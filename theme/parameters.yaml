@@ -1,9 +1,9 @@
 color_scheme:
   colors:
-  - {color: '#6750A4', name: Primary}
-  - {color: '#EADDFF', name: Primary Container}
+  - {color: '#e10217', name: Primary}
+  - {color: '#dedad9', name: Primary Container}
   - {color: '#FFFFFF', name: On Primary}
-  - {color: '#21005E', name: On Primary Container}
+  - {color: schwarz, name: On Primary Container}
   - {color: '#625B71', name: Secondary}
   - {color: '#E8DEF8', name: Secondary Container}
   - {color: '#FFFFFF', name: On Secondary}
