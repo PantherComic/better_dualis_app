@@ -10,4 +10,5 @@ unique_ids:
   modules: {}
   scripts: {}
   server_modules:
-    server_api_call: '1762172445184496803305479.60516'
+    dualis_logic: '1762180828426477469081644.7675'
+    dualis_server: '1762172445184496803305479.60516'

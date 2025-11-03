@@ -12,3 +12,5 @@ class Login(LoginTemplate):
 
   def link_1_click(self, **event_args):
     webbrowser.open("https://dualis.dhbw.de/")
+
+  

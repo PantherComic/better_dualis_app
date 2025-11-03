@@ -41,10 +41,6 @@ components:
         padding: [null, '-1', null, null]
       text: Hallo [username]
     type: Label
-  - layout_properties: {grid_position: 'XAXVVL,MEORWU'}
-    name: data_row_panel_1
-    properties: {}
-    type: DataRowPanel
   layout_properties: {slot: default}
   name: column_panel_1
   properties: {}

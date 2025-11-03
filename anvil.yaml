@@ -6,8 +6,9 @@ package_name: better_dualis_app
 renamed: true
 runtime_options:
   client_version: '3'
-  server_spec: {base: python310-minimal}
-  server_version: python3-sandbox
+  server_spec: {base: python310-machine-learning}
+  server_spec_disabled: {base: python310-minimal, requirements: ''}
+  server_version: python3-full
   version: 2
 services:
 - client_config: {}

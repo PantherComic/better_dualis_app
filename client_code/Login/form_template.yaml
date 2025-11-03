@@ -28,12 +28,12 @@ components:
     properties: {height: 32}
     type: Spacer
   - layout_properties: {grid_position: 'HBJJJA,CHAUOM'}
-    name: outlined_1
-    properties: {font_size: 18, placeholder: Benutzername, role: outlined, text: ''}
+    name: username_box
+    properties: {font_size: 18, placeholder: Benutzername, role: outlined, text: '', type: email}
     type: TextBox
   - layout_properties: {grid_position: 'BIVRUY,SWTPKU'}
-    name: outlined_2
-    properties: {font_size: 18, placeholder: Passwort, role: outlined, text: ''}
+    name: password_box
+    properties: {font_size: 18, hide_text: true, placeholder: Passwort, role: outlined, text: '', visible: true}
     type: TextBox
   - layout_properties: {grid_position: 'IIVFVC,ZXSYWN'}
     name: spacer_1
