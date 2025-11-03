@@ -1,9 +1,13 @@
 unique_ids:
   assets:
+    50621467.png: '176217060540091352573107.99117'
     standard-page.html: J77K5I3DKSEWWBLQW5DJOZA2HA5CRBE4
     theme.css: WEZYCCCR4CKK3JG7WOHTSRYHPH5YCQTD
   forms:
-    Form1: EWXB3JI6U4DQ76GO55RY3GDNZADCWIF4
+    Login: EWXB3JI6U4DQ76GO55RY3GDNZADCWIF4
+    Login.Main: '1762172421036457969158291.4614'
+    Login.Main.RowTemplate1: '1762173138497510522763274.1397'
   modules: {}
   scripts: {}
-  server_modules: {}
+  server_modules:
+    server_api_call: '1762172445184496803305479.60516'

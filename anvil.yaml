@@ -1,6 +1,6 @@
 allow_embedding: false
 dependencies: []
-metadata: {title: Better Dualis}
+metadata: {logo_img: 'asset:50621467.png', title: Better Dualis}
 name: better_dualis_app
 package_name: better_dualis_app
 renamed: true
@@ -13,4 +13,5 @@ services:
 - client_config: {}
   server_config: {}
   source: /runtime/services/tables.yml
-startup_form: Form1
+startup: {module: Login, type: form}
+startup_form: null

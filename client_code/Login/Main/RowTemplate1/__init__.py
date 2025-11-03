@@ -1,7 +1,9 @@
-from ._anvil_designer import Form1Template
+from ._anvil_designer import RowTemplate1Template
 from anvil import *
+import anvil.server
 
-class Form1(Form1Template):
+
+class RowTemplate1(RowTemplate1Template):
   def __init__(self, **properties):
     # Set Form properties and Data Bindings.
     self.init_components(**properties)
