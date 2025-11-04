@@ -1,5 +1,10 @@
 components:
 - components:
+  - event_bindings: {click: abmelden_button_click}
+    layout_properties: {}
+    name: abmelden_button
+    properties: {role: outlined-button, text: Abmelden}
+    type: Button
   - event_bindings: {click: link_1_click}
     layout_properties: {}
     name: link_1
@@ -41,6 +46,10 @@ components:
         padding: [null, '-1', null, null]
       text: Hallo [username]
     type: Label
+  - layout_properties: {grid_position: 'EGYSCS,ZNJQLH'}
+    name: grades_panel
+    properties: {item_template: Login.Main.ItemTemplate1}
+    type: RepeatingPanel
   layout_properties: {slot: default}
   name: column_panel_1
   properties: {}

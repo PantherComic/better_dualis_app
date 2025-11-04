@@ -10,6 +10,7 @@ runtime_options:
   server_spec_disabled: {base: python310-minimal, requirements: ''}
   server_version: python3-full
   version: 2
+scheduled_tasks: []
 services:
 - client_config: {}
   server_config: {}
