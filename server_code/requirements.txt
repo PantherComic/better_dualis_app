@@ -1,3 +1,4 @@
-git+https://github.com/KarelZe/dualis/
 requests
 beautifulsoup4
+Werkzeug
+Flask

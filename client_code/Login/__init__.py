@@ -2,8 +2,6 @@ from ._anvil_designer import LoginTemplate
 from anvil import *
 import anvil.server
 import webbrowser
-from .Main import Main
-from .Main.ItemTemplate1 import ItemTemplate1
 
 class Login(LoginTemplate):
   def __init__(self, **properties):
@@ -16,22 +14,20 @@ class Login(LoginTemplate):
 
 
   def outlined_button_1_click(self, **event_args):
-    username = self.username_box.text
+    user = self.user_box.text
     password = self.password_box.text
 
-    if not username or not password:
+    if not user or not password:
       self.status_label.text = "Bitte geben Sie Benutzername und Passwort ein."
       return
 
     try:
-      grades_data, error_message = anvil.server.call('fetch_grades_from_dualis', username, password)
-  
-      if error_message:
-        self.status_label.text = f"Fehler: {error_message}"
-      elif grades_data:
-        open_form('Login.Main', grades_list=grades_data)
-      else:
-        self.status_label.text = "Keine Daten empfangen."
-  
+      grades_list = anvil.server.call('get_grades', user, password)
+      print("Noten erfolgreich abgerufen:", grades_list)
+      # Zeigen Sie die Noten in Ihrer App an
+    except anvil.server.PermissionDenied as e:
+     # Dieser Fehler wird ausgelöst, wenn der Login fehlschlägt
+      alert(f"Login fehlgeschlagen: {e}")
     except Exception as e:
-      self.status_label.text = f"Ein unerwarteter Client-Fehler ist aufgetreten: {e}"
+      # Fängt andere Fehler ab (z.B. Verbindungsfehler)
+      alert(f"Ein Fehler ist aufgetreten: {e}")

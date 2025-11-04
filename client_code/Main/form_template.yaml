@@ -48,7 +48,7 @@ components:
     type: Label
   - layout_properties: {grid_position: 'EGYSCS,ZNJQLH'}
     name: grades_panel
-    properties: {item_template: Login.Main.ItemTemplate1}
+    properties: {item_template: Main.ItemTemplate1}
     type: RepeatingPanel
   layout_properties: {slot: default}
   name: column_panel_1

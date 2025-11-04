@@ -2,13 +2,17 @@ from ._anvil_designer import MainTemplate
 from anvil import *
 import anvil.server
 import webbrowser
+from .ItemTemplate1 import ItemTemplate1 # <-- DIESE ZEILE HINZUFÜGEN
+
 
 
 class Main(MainTemplate):
   def __init__(self, grades_list=None, **properties):
     # Set Form properties and Data Bindings.
     self.init_components(**properties)
-    self.grades_panel.item_template = ItemTemplate1
+
+    # Jetzt ist ItemTemplate1 hier bekannt
+    self.grades_panel.item_template = ItemTemplate1 
 
     if grades_list:
       self.grades_panel.items = grades_list
