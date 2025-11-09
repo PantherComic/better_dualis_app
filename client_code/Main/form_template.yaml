@@ -46,6 +46,26 @@ components:
         padding: [null, '-1', null, null]
       text: Hallo [username]
     type: Label
+  - layout_properties: {grid_position: 'QSFMBQ,PGBTZF'}
+    name: label_3
+    properties: {text: Semester}
+    type: Label
+  - layout_properties: {grid_position: 'QSFMBQ,VXVWEK'}
+    name: label_4
+    properties: {text: Modul}
+    type: Label
+  - layout_properties: {grid_position: 'QSFMBQ,ELRJWC'}
+    name: label_5
+    properties: {text: Note}
+    type: Label
+  - layout_properties: {grid_position: 'QSFMBQ,ODBAZH'}
+    name: label_6
+    properties: {text: CP}
+    type: Label
+  - layout_properties: {grid_position: 'QSFMBQ,FFOYDU'}
+    name: label_7
+    properties: {text: Satus}
+    type: Label
   - layout_properties: {grid_position: 'EGYSCS,ZNJQLH'}
     name: grades_panel
     properties: {item_template: Main.ItemTemplate1}

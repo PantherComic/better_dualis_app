@@ -1,6 +1,6 @@
 components:
 - layout_properties: {grid_position: 'XUIIVC,OJOOQU'}
-  name: curse_name_label
+  name: name_label
   properties: {text: ''}
   type: Label
 - layout_properties: {grid_position: 'XUIIVC,HNPSUC'}
@@ -9,6 +9,10 @@ components:
   type: Label
 - layout_properties: {grid_position: 'XUIIVC,APBPNL'}
   name: cp_label
+  properties: {}
+  type: Label
+- layout_properties: {grid_position: 'XUIIVC,IQBJZL'}
+  name: status_label
   properties: {}
   type: Label
 container: {type: ColumnPanel}

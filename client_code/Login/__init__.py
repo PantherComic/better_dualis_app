@@ -6,8 +6,10 @@ import webbrowser
 class Login(LoginTemplate):
   def __init__(self, **properties):
     self.init_components(**properties)
+    # --- DataGrid-Spalten-Definition entfernt ---
 
   def link_1_click(self, **event_args):
+    # Öffnet die Dualis-Seite in einem neuen Tab
     webbrowser.open("https://dualis.dhbw.de/")
 
   def outlined_button_1_click(self, **event_args):
@@ -16,30 +18,33 @@ class Login(LoginTemplate):
 
     if not user or not password:
       self.status_label.text = "Bitte geben Sie Benutzername und Passwort ein."
+      self.status_label.foreground = "#FF0000" # Rot für Fehler
       return
 
-      # --- Debug-Verbesserungen ---
-      # 1. Status-Label für Lade-Feedback nutzen
-    self.status_label.text = "Einloggen und Noten abrufen... (Dies kann 5-10 Sekunden dauern)"
-    # 2. Button deaktivieren, um doppelte Anfragen zu verhindern
-    self.outlined_button_1.enabled = False
+      # --- UI für Ladevorgang ---
+    self.status_label.text = "Melde an und lade Noten... (Dies kann einige Sekunden dauern)"
+    self.status_label.foreground = "#000000" # Standardfarbe
+    self.outlined_button_1.enabled = False # Button deaktivieren
+
+    # --- Referenz auf 'self.progress_bar' ENTFERNT ---
 
     try:
+      # Server-Funktion aufrufen
       grades_list = anvil.server.call('get_grades', user, password)
 
-      # Altes Alert beibehalten, wenn es gewünscht ist, aber Label auch aktualisieren
-      self.status_label.text = f"Erfolgreich! {len(grades_list)} Lerneinheiten gefunden."
-      alert(f"Noten erfolgreich abgerufen: {len(grades_list)} Lerneinheiten gefunden.")
-
-      # Hier Logik einfügen, um die Noten in der App anzuzeigen
-      # z.B. open_form('NotenAnzeige', grades=grades_list)
+      # --- ERFOLGSFALL (GEÄNDERT) ---
+      # Öffne das Main-Formular und übergib die Rohdaten der Noten
+      open_form('Main', grades_list=grades_list)
 
     except anvil.server.PermissionDenied as e:
-      # 3. Label für Fehler nutzen (besser als Alert)
+      # Login fehlgeschlagen (vom Server ausgelöst)
       self.status_label.text = f"Login fehlgeschlagen: {e}"
+      self.status_label.foreground = "#FF0000"
+      # Wichtig: UI bei Fehler wieder aktivieren
+      self.outlined_button_1.enabled = True
     except Exception as e:
-      # 4. Label für andere Fehler nutzen
-      self.status_label.text = f"Ein Fehler ist aufgetreten: {e}"
-    finally:
-      # 5. Button in jedem Fall wieder aktivieren
+      # Alle anderen Fehler (Netzwerk, 403, 500, etc.)
+      self.status_label.text = f"Ein unerwarteter Fehler ist aufgetreten: {e}"
+      self.status_label.foreground = "#FF0000"
+      # Wichtig: UI bei Fehler wieder aktivieren
       self.outlined_button_1.enabled = True

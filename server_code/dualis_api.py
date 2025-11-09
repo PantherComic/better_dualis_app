@@ -1,173 +1,267 @@
 import anvil.server
-import itertools
-from concurrent import futures
 import requests
 from bs4 import BeautifulSoup
-
-  
-# --- Alle Flask-Imports wurden entfernt ---
-# from flask import Flask, jsonify, request
-# from werkzeug.exceptions import abort
+import time
+import re # Zum Parsen des REFRESH-Headers
 
 BASE_URL = "https://dualis.dhbw.de"
-# Die globale Variable 'units' wurde entfernt.
-
 
 @anvil.server.callable
-def get_semesters2():
-  # TODO: refactor code so that semesters can be accessed through endpoint
-  # Gibt ein einfaches Dictionary zurück
+def get_semesters():
   return {}
 
-
 @anvil.server.callable
-def get_units2():
-  # TODO: refactor code so that units and all relating exams can be accessed through endpoint
-  # Gibt ein einfaches Dictionary zurück
+def get_units():
   return {}
 
-
 @anvil.server.callable
-def get_grades2(user, password):
+def get_grades(user, password):
   """
-  Anvil-Serverfunktion zur Abfrage von Noten von dualis.dhbw.de.
-  Erwartet user und password als direkte Funktionsargumente.
-  :param user: Der Benutzername
-  :param password: Das Passwort
-  :return: Eine Liste von Dictionaries mit den Noten aller Semester.
-  """
+    Anvil-Serverfunktion zur Abfrage von Noten.
+    
+    Korrektur 7: Sendet einen POST (anstatt GET), um die einzelnen
+    Semesterseiten abzurufen, basierend auf dem 'semesterchange'-Formular.
+    Korrektur 8: Liest 'Credits' (CPs) aus der Tabelle aus.
+    """
 
-  # 'units' wird hier initialisiert, damit jede Anfrage eine eigene, leere Liste hat.
-  units = [] 
+  print(f"--- Neue 'get_grades' Anfrage gestartet ---")
 
-  # --- Flask-Code (request.json) wurde entfernt ---
-  # 'user' und 'password' kommen direkt als Funktionsargumente.
+  all_grades = []
 
-  # Einfache Validierung
   if not user or not password:
+    print("Fehler: Benutzer oder Passwort nicht angegeben.")
     raise anvil.server.PermissionDenied("Benutzername und Passwort dürfen nicht leer sein.")
 
-  # create a session
-  url = BASE_URL + "/scripts/mgrqcgi?APPNAME=CampusNet&PRGNAME=EXTERNALPAGES&ARGUMENTS=-N000000000000001,-N000324,-Awelcome"
-  cookie_request = requests.get(url)
+    # 1. Einzige Session für alle Anfragen erstellen
+  with requests.Session() as s:
 
-  data = {"usrname": user, "pass": password,
-          "APPNAME": "CampusNet",
-          "PRGNAME": "LOGINCHECK",
-          "ARGUMENTS": "clino,usrname,pass,menuno,menu_type, browser,platform",
-          "clino": "000000000000001",
-          "menuno": "000324",
-          "menu_type": "classic",
-          "browser": "",
-          "platform": ""
+    # 2. User-Agent SETZEN
+    s.headers.update({
+      'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
+    })
+
+    # 3. 'Referer'-Header für Login
+    login_page_referer = BASE_URL + "/"
+    s.headers.update({'Referer': login_page_referer})
+    print(f"Setze 'Referer'-Header auf: {login_page_referer}")
+
+    # Der POST-Endpunkt für den Login
+    login_post_url = BASE_URL + "/scripts/mgrqispi.dll/"
+
+    # 4. 'cnsc=0' Cookie manuell setzen
+    print("Setze 'cnsc=0' Cookie vor dem Login.")
+    s.cookies.set('cnsc', '0')
+
+    # Daten-Payload für Login
+    login_data = {"usrname": user, "pass": password,
+                  "APPNAME": "CampusNet",
+                  "PRGNAME": "LOGINCHECK",
+                  "ARGUMENTS": "clino,usrname,pass,menuno,menu_type, browser,platform",
+                  "clino": "000000000000001",
+                  "menuno": "000324",
+                  "menu_type": "classic",
+                  "browser": "",
+                  "platform": ""
+                 }
+
+    # 5. Login-POST
+    try:
+      print(f"Sende Login-POST für Benutzer: {user} an {login_post_url}...")
+      login_response = s.post(login_post_url, data=login_data, verify=True, timeout=10)
+      print(f"Login-Antwort erhalten, Status: {login_response.status_code}")
+    except requests.RequestException as e:
+      print(f"FEHLER bei Login-Anfrage: {e}")
+      raise Exception(f"Login-Anfrage fehlgeschlagen: {e}")
+
+      # Login-Prüfungen
+    if not login_response.ok:
+      print(f"FEHLER: Login-Antwort nicht OK, Status: {login_response.status_code}")
+      raise Exception(f"Login-Anfrage fehlgeschlagen mit Statuscode: {login_response.status_code}")
+
+    if 'REFRESH' not in login_response.headers:
+      print("FEHLER: 'REFRESH'-Header nicht in der Login-Antwort. Login fehlgeschlagen.")
+      raise anvil.server.PermissionDenied("Login fehlgeschlagen. Bitte Benutzername und Passwort prüfen.")
+
+    print("Login erfolgreich, 'REFRESH'-Header gefunden.")
+
+    # 6. REFRESH-Header parsen
+    refresh_header = login_response.headers['REFRESH']
+    match = re.search(r'URL=(.*)', refresh_header)
+    if not match:
+      print(f"FEHLER: Konnte URL nicht aus REFRESH-Header parsen: {refresh_header}")
+      raise Exception("Login-Redirect fehlgeschlagen.")
+
+    redirect_path = match.group(1).replace("STARTPAGE_DISPATCH", "COURSERESULTS")
+    url_content = BASE_URL + redirect_path # Dies ist die URL der Semester-Hauptseite
+
+    print(f"Weiterleitungs-URL (Semester-Hauptseite) geparst: {url_content}")
+
+    # 7. Semester-Hauptseite abrufen (mit GET)
+    try:
+      print("Rufe Semester-Hauptseite ab...")
+      s.headers.update({'Referer': login_page_referer}) # Referer ist noch die Login-Seite
+      semester_ids_response = s.get(url_content, timeout=10)
+      print(f"Semester-Hauptseite erhalten, Status: {semester_ids_response.status_code}")
+    except requests.RequestException as e:
+      print(f"FEHLER beim Abruf der Semester-Hauptseite: {e}")
+      raise Exception(f"Semester-Abfrage fehlgeschlagen: {e}")
+
+    if not semester_ids_response.ok:
+      raise Exception(f"Semester-Abfrage fehlgeschlagen mit Statuscode: {semester_ids_response.status_code}")
+
+      # 8. Semester-IDs UND Formular-Daten auslesen
+    soup = BeautifulSoup(semester_ids_response.content, 'html.parser')
+
+    # Semester-IDs aus dem Dropdown
+    options = soup.find_all('option')
+    semester_ids = [option['value'] for option in options]
+
+    # Versteckte Formular-Daten für den POST-Befehl auslesen
+    try:
+      form_data = {}
+      form = soup.find('form', {'id': 'semesterchange'})
+      if not form:
+        print("FEHLER: Konnte 'semesterchange'-Formular nicht auf der Seite finden. HTML ist unerwartet.")
+        raise Exception("Konnte Semester-Formular nicht finden.")
+
+      form_action_url = BASE_URL + form['action'] # z.B. /scripts/mgrqispi.dll
+
+      hidden_inputs = form.find_all('input', {'type': 'hidden'})
+      for input_tag in hidden_inputs:
+        name = input_tag.get('name')
+        value = input_tag.get('value', '') # Nimm leeren String, falls value fehlt
+        if name:
+          form_data[name] = value
+
+      print(f"Formular-Daten geparst: {form_data}")
+
+    except Exception as e:
+      print(f"FEHLER beim Parsen der Formular-Daten: {e}")
+      print(f"HTML der Seite (erste 1000 Zeichen): {semester_ids_response.content[:1000]}")
+      raise Exception("Fehler beim Parsen der Semester-Formulardaten.")
+
+    print(f"{len(semester_ids)} Semester-IDs im Dropdown gefunden.")
+
+    # 9. Einzelne Semesterseiten abrufen (jetzt mit POST)
+    for i, sem_id in enumerate(semester_ids):
+      try:
+        # 1. Den 'Referer'-Header auf die Seite setzen, von der wir "posten"
+        print(f"Aktualisiere 'Referer'-Header auf: {url_content}")
+        s.headers.update({'Referer': url_content})
+
+        # 2. Die POST-Daten vorbereiten
+        post_payload = form_data.copy()
+        post_payload['semester'] = sem_id # Das ist das Dropdown-Feld
+
+        print(f"Verarbeite Semester {i+1}/{len(semester_ids)} (ID: {sem_id}). Sende POST...")
+
+        # 3. Den POST-Befehl senden
+        semester_response = s.post(form_action_url, data=post_payload, timeout=10)
+
+        if semester_response.ok:
+          semester_grades = parse_semester_overview(semester_response.content)
+          all_grades.extend(semester_grades)
+        else:
+          print(f"WARNUNG: POST-Anfrage für Semester-ID {sem_id} schlug fehl, Status: {semester_response.status_code}")
+          print(f"FEHLER-HTML: {semester_response.text[:500]}...") 
+
+      except requests.RequestException as e:
+        print(f"FEHLER beim Abrufen von Semester-ID {sem_id}: {e}")
+        continue 
+
+    print(f"{len(all_grades)} Lerneinheiten insgesamt gefunden.")
+
+    # 10. Logout
+    s.headers.update({'Referer': url_content}) # Referer ist die letzte Seite, die wir besucht haben
+    logout_button = soup.find('a', {'id': 'logoutButton'})
+    if logout_button and 'href' in logout_button.attrs:
+      logout_url = BASE_URL + logout_button['href']
+      print("Führe Logout durch...")
+      s.get(logout_url, timeout=10) 
+
+    print(f"--- 'get_grades' Anfrage erfolgreich beendet. {len(all_grades)} Lerneinheiten gefunden. ---")
+
+  return all_grades
+
+
+# ----- HILFSFUNKTIONEN (Aktualisiert) -----
+
+def parse_semester_overview(html_content):
+  """
+    Parst die Noten-ÜBERSICHTS-Tabelle (die 'nb list' Tabelle).
+    Liest jetzt auch Credits (CPs) aus.
+    """
+
+  print(f"DEBUG (parse_semester_overview): Beginne HTML-Parsing...")
+
+  semester_soup = BeautifulSoup(html_content, 'html.parser')
+
+  # Suchen nach der Tabelle, die im Screenshot und Referenzcode zu sehen ist
+  table = semester_soup.find("table", {"class": "nb list"})
+
+  if not table:
+    print("DEBUG (parse_semester_overview): Konnte Tabelle 'nb list' NICHT finden.")
+    body_tag = semester_soup.find('body')
+    if body_tag:
+      print(f"DEBUG: Body-Inhalt (falls Fehlerseite): {body_tag.text[:500]}...")
+    return []
+
+  print("DEBUG (parse_semester_overview): Tabelle 'nb list' GEFUNDEN.")
+  grades_list = []
+
+  try:
+    rows = table.find('tbody').find_all('tr')
+  except AttributeError:
+    # Fallback, falls <tbody> nicht existiert
+    rows = table.find_all('tr')
+
+  if not rows:
+    print("DEBUG (parse_semester_overview): Tabelle 'nb list' gefunden, aber keine Zeilen (tr) darin.")
+    return []
+
+    # Die letzte Zeile ist oft der GPA (Notendurchschnitt), wir überspringen sie
+  for row in rows[:-1]: 
+    cols = row.find_all('td')
+
+    # Erhöhte Stabilität: Sicherstellen, dass wir genug Spalten haben
+    if len(cols) >= 5: # Brauchen mind. 5 Spalten (Name, Note, CP, Status)
+      try:
+        unit_name = cols[1].text.strip()
+        grade = cols[2].text.strip()
+        cp = cols[3].text.strip() # <-- KORREKTUR: Credits (CPs)
+        status = cols[4].text.strip()
+
+        # Leere Zeilen überspringen (z.B. nur '&nbsp;')
+        if not unit_name and not grade and not status:
+          continue
+
+        unit = {
+          'name': unit_name,
+          'exams': [{
+            'name': 'Endnote', 
+            'date': '',       
+            'grade': grade,
+            'status': status,
+            'cp': cp, # <-- KORREKTUR: Hinzugefügt
+            'externally accepted': False
+          }]
         }
+        grades_list.append(unit)
 
-  login_response = requests.post(url, data=data, headers=None, verify=True, cookies=cookie_request.cookies)
+      except Exception as e:
+        print(f"FEHLER (parse_semester_overview): Konnte Zeile nicht parsen. Fehler: {e}. Zeileninhalt: {row.text}")
+        continue
+    else:
+      print(f"DEBUG (parse_semester_overview): Zeile übersprungen, da sie nicht genug Spalten (<5) hatte.")
 
-  # --- Bessere Fehlerbehandlung (ersetzt 'abort') ---
-  if not login_response.ok:
-    raise Exception(f"Login-Anfrage fehlgeschlagen mit Statuscode: {login_response.status_code}")
-
-  # Prüfen, ob Login erfolgreich war (REFRESH Header ist vorhanden)
-  if 'REFRESH' not in login_response.headers:
-    raise anvil.server.PermissionDenied("Login fehlgeschlagen. Bitte Benutzername und Passwort prüfen.")
-
-  arguments = login_response.headers['REFRESH']
-
-  # redirecting to course results...
-  url_content = BASE_URL + "/scripts/mgrqcgi?APPNAME=CampusNet&PRGNAME=STARTPAGE_DISPATCH&ARGUMENTS=" + arguments[79:]
-  url_content = url_content.replace("STARTPAGE_DISPATCH", "COURSERESULTS")
-  semester_ids_response = requests.get(url_content, cookies=login_response.cookies)
-
-  if not semester_ids_response.ok:
-    # Ersetzt 'abort'
-    raise Exception(f"Semester-Abfrage fehlgeschlagen mit Statuscode: {semester_ids_response.status_code}")
-
-  # get ids of all semester, replaces -N ...
-  soup = BeautifulSoup(semester_ids_response.content, 'html.parser')
-  options = soup.find_all('option')
-  semester_ids = [option['value'] for option in options]
-  semester_urls = [url_content[:-15] + semester_id for semester_id in semester_ids]
-
-  # search for all unit_urls in parallel
-  with futures.ThreadPoolExecutor(8) as semester_pool:
-    tmp = semester_pool.map(parse_semester, semester_urls, [login_response.cookies] * len(semester_urls))
-  unit_urls = list(itertools.chain.from_iterable(tmp))
-
-  # query all unit_urls to obtain grades in parallel
-  with futures.ThreadPoolExecutor(8) as detail_pool:
-    semester = detail_pool.map(parse_unit, unit_urls, [login_response.cookies] * len(unit_urls))
-  units.extend(semester)
-
-  # find logout url in html source code and logout
-  # (Sicherheitsprüfung hinzugefügt, falls Button nicht gefunden wird)
-  logout_button = soup.find('a', {'id': 'logoutButton'})
-  if logout_button and 'href' in logout_button.attrs:
-    logout_url = BASE_URL + logout_button['href']
-    logout(logout_url, cookie_request.cookies)
-
-  # --- Rückgabe als normale Python-Liste (ersetzt 'jsonify') ---
-  return units
-
-
-# ----- Die Hilfsfunktionen bleiben unverändert -----
-
-def parse_student_results(url, cookies):
-  response = requests.get(url=url, cookies=cookies)
-  student_result_soup = BeautifulSoup(response.content, "html.parser")
-  table = student_result_soup.find("table", {"class": "students_results"})
-  return [a['href'] for a in table.find_all("a", href=True)]
-
-
-def parse_semester(url, cookies):
-  semester_response = requests.get(url, cookies=cookies)
-  semester_soup = BeautifulSoup(semester_response.content, 'html.parser')
-  table = semester_soup.find("table", {"class": "list"})
-  return [script.text.strip()[301:414] for script in table.find_all("script")]
-
-
-def parse_unit(url, cookies):
-  response = requests.get(url=BASE_URL + url, cookies=cookies)
-  detail_soup = BeautifulSoup(response.content, "html.parser")
-  h1 = detail_soup.find("h1").text.strip()
-  table = detail_soup.find("table", {"class": "tb"})
-  td = [td.text.strip() for td in table.find_all("td")]
-  unit = {'name': h1.replace("\n", " ").replace("\r", ""), 'exams': []}
-  # units have non uniform structure. Try to map based on total size.
-  if len(td) <= 24:
-    exam = {'name': td[13], 'date': td[14], 'grade': td[15], 'externally accepted': False}
-    unit['exams'].append(exam)
-  elif len(td) <= 29:
-    exam = {'name': td[19], 'date': td[14], 'grade': td[21], 'externally accepted': False}
-    unit['exams'].append(exam)
-  elif len(td) == 30:
-    for idx in range(13, len(td) - 5, 6):
-      exam = {'name': td[idx], 'date': td[idx + 1], 'grade': td[idx + 2], 'externally accepted': False}
-      unit['exams'].append(exam)
-  elif len(td) <= 31:
-    for idx in range(11, len(td) - 7, 7):
-      exam = {'name': td[idx], 'date': td[idx + 3], 'grade': td[idx + 4], 'externally accepted': False}
-      unit['exams'].append(exam)
-  else:
-    for idx in range(19, len(td) - 5, 6):
-      exam = {'name': td[idx], 'date': td[14], 'grade': td[idx + 2], 'externally accepted': False}
-      unit['exams'].append(exam)
-  return unit
-
-
-def logout(url, cookies):
-  return requests.get(url=url, cookies=cookies).ok
+  print(f"DEBUG (parse_semester_overview): {len(grades_list)} Noten in Tabelle 'nb list' gefunden.")
+  return grades_list
 
 
 # --- HINZUGEFÜGT: Anvil Server Uplink ---
-# Dieser Teil wird benötigt, um das Skript als Server laufen zu lassen.
 if __name__ == "__main__":
   # Ersetzen Sie dies mit Ihrem Anvil Uplink Key
   anvil.server.connect("DEIN_UPLINK_SCHLÜSSEL_HIER") 
 
   print("Verbunden mit Anvil. Warte auf Funktionsaufrufe...")
   anvil.server.wait_forever()
-
-
-
-
