@@ -3,22 +3,17 @@ components:
   - event_bindings: {click: abmelden_button_click}
     layout_properties: {}
     name: abmelden_button
-    properties: {role: outlined-button, text: Abmelden}
-    type: Button
-  - event_bindings: {click: link_1_click}
-    layout_properties: {}
-    name: link_1
     properties:
-      align: center
-      background: theme:Primary
-      font_size: 12
-      foreground: theme:On Primary
-      italic: true
+      role: outlined-button
       spacing:
-        padding: ['8', '15', '8', '15']
-      spacing_above: medium
-      text: Dualis
-    type: Link
+        padding: [null, null, '10', null]
+      text: Abmelden
+    type: Button
+  - event_bindings: {click: dualis_link_1_click}
+    layout_properties: {}
+    name: dualis_link_1
+    properties: {background: 'theme:Primary', foreground: 'theme:On Primary', text: Dualis}
+    type: Button
   layout_properties: {slot: nav-right}
   name: navbar_links
   properties: {}
@@ -39,32 +34,41 @@ components:
   properties: {height: 42.666656494140625, source: _/theme/50621467.png}
   type: Image
 - components:
+  - layout_properties: {grid_position: 'VKITRS,ZRDROO'}
+    name: spacer_1
+    properties: {height: 32}
+    type: Spacer
   - layout_properties: {grid_position: 'ZURGHN,MSLHSF'}
-    name: label_2
+    name: name_display_label
     properties:
       spacing:
         padding: [null, '-1', null, null]
-      text: Hallo [username]
+      text: ''
+      visible: true
     type: Label
+  - layout_properties: {grid_position: 'ZLXWNF,UDLBMA'}
+    name: spacer_2
+    properties: {height: 32}
+    type: Spacer
   - layout_properties: {grid_position: 'QSFMBQ,PGBTZF'}
     name: label_3
-    properties: {text: Semester}
+    properties: {align: center, background: 'theme:Primary', bold: true, foreground: 'theme:On Primary', text: Semester}
     type: Label
   - layout_properties: {grid_position: 'QSFMBQ,VXVWEK'}
     name: label_4
-    properties: {text: Modul}
+    properties: {align: center, background: 'theme:Primary', bold: true, foreground: 'theme:On Primary', text: Modul}
     type: Label
   - layout_properties: {grid_position: 'QSFMBQ,ELRJWC'}
     name: label_5
-    properties: {text: Note}
+    properties: {align: center, background: 'theme:Primary', bold: true, foreground: 'theme:On Primary', text: Note}
     type: Label
   - layout_properties: {grid_position: 'QSFMBQ,ODBAZH'}
     name: label_6
-    properties: {text: CP}
+    properties: {align: center, background: 'theme:Primary', bold: true, foreground: 'theme:On Primary', text: CP}
     type: Label
   - layout_properties: {grid_position: 'QSFMBQ,FFOYDU'}
     name: label_7
-    properties: {text: Satus}
+    properties: {align: center, background: 'theme:Primary', bold: true, foreground: 'theme:On Primary', text: Satus}
     type: Label
   - layout_properties: {grid_position: 'EGYSCS,ZNJQLH'}
     name: grades_panel

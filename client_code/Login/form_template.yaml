@@ -65,20 +65,11 @@ components:
   properties: {col_widths: '{}'}
   type: ColumnPanel
 - components:
-  - event_bindings: {click: link_1_click}
+  - event_bindings: {click: dualis_link_1_click}
     layout_properties: {}
-    name: link_1
-    properties:
-      align: center
-      background: theme:Primary
-      font_size: 12
-      foreground: theme:On Primary
-      italic: true
-      spacing:
-        padding: ['8', '15', '8', '15']
-      spacing_above: medium
-      text: Dualis
-    type: Link
+    name: dualis_link_1
+    properties: {background: 'theme:Primary', foreground: 'theme:On Primary', text: Dualis}
+    type: Button
   layout_properties: {slot: nav-right}
   name: navbar_links
   properties: {}

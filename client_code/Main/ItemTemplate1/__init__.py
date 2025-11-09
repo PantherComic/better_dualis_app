@@ -16,20 +16,14 @@ class ItemTemplate1(ItemTemplate1Template):
     self._item = value
 
     # --- KORREKTUR ---
-    # Dieser Code wird jetzt ausgeführt und weist die Daten 
-    # den Labels im Designer zu.
+    # Die festen Beschriftungen "Note:" und "CPs:" wurden entfernt.
+    # Die Labels zeigen jetzt nur noch die reinen Daten an.
 
-    # Wir greifen auf die Daten zu, die Main.py uns gibt:
-    # self._item['name'], self._item['grade'], etc.
+    # Stelle sicher, dass deine Labels im Designer 
+    # (semester_label, name_label, grade_label, cp_label, status_label) heißen.
 
-    # Wir weisen sie den Labels in DIESEM Template zu.
-    # Ich gehe davon aus, dass deine Labels so heißen:
-    # name_label, grade_label, cp_label, status_label
-
-    # Wenn deine Labels anders heißen, passe die Namen hier an
-    # (z.B. self.meine_note_label.text = ...)
-
+    self.semester_label.text = self._item.get('semester_name', '-') # <-- HINZUGEFÜGT
     self.name_label.text = self._item.get('name', 'N/A')
-    self.grade_label.text = f"Note: {self._item.get('grade', '-')}"
-    self.cp_label.text = f"CPs: {self._item.get('cp', '-')}"
+    self.grade_label.text = self._item.get('grade', '-')
+    self.cp_label.text = self._item.get('cp', '-')
     self.status_label.text = self._item.get('status', 'N/A')

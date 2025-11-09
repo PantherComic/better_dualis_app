@@ -2,44 +2,44 @@ from ._anvil_designer import MainTemplate
 from anvil import *
 import anvil.server
 import webbrowser
-from .ItemTemplate1 import ItemTemplate1 # <-- DIESE ZEILE HINZUFÜGEN
+from .ItemTemplate1 import ItemTemplate1
 
 class Main(MainTemplate):
-  def __init__(self, grades_list=None, **properties):
-    # Set Form properties and Data Bindings.
+  def __init__(self, result_data=None, **properties):
     self.init_components(**properties)
-
-    # Setze das ItemTemplate für das RepeatingPanel
     self.grades_panel.item_template = ItemTemplate1 
-
     display_list = []
-    if grades_list:
-      # --- DATENAUFBEREITUNG ("FLACH KLOPFEN") ---
-      # Wir bereiten die Daten so auf, dass ItemTemplate1
-      # sie im 'item'-Setter verarbeiten kann.
+
+    if result_data:
+      grades_list = result_data.get('grades', [])
+      student_name = result_data.get('student_name', 'Unbekannt')
+
+      try:
+        self.name_display_label.text = f"Willkommen, {student_name}"
+      except AttributeError:
+        print("WARNUNG: Label 'name_display_label' nicht im Main-Formular gefunden.")
 
       for item in grades_list:
-        # Nimm die erste Prüfung aus der 'exams'-Liste (oder ein leeres Dict)
         first_exam = item.get('exams', [{}])[0] 
-
-        # --- KORREKTUR: Schlüsselnamen an ItemTemplate1 angepasst ---
-        # ItemTemplate1 erwartet 'name', 'grade', 'status' und 'cp'.
-
         display_list.append({
+          'semester_name': item.get('semester_name', 'N/A'),
           'name': item.get('name', 'N/A'),
           'grade': first_exam.get('grade', 'N/A'),
           'status': first_exam.get('status', 'N/A'),
-          'cp': first_exam.get('cp', 'N/A') # <-- KORREKTUR: Hinzugefügt
+          'cp': first_exam.get('cp', 'N/A') 
         })
 
       self.grades_panel.items = display_list
     else:
-      # Fallback, falls die Seite direkt ohne Daten geladen wird
       self.grades_panel.items = []
+      try:
+        self.name_display_label.text = "Willkommen"
+      except AttributeError:
+        pass
       alert("Keine Noten zum Anzeigen gefunden.")
 
   def abmelden_button_click(self, **event_args):
     open_form('Login')
 
-  def link_1_click(self, **event_args):
+  def dualis_link_1_click(self, **event_args):
     webbrowser.open("https://dualis.dhbw.de/")
