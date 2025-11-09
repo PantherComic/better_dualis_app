@@ -4,6 +4,7 @@ from concurrent import futures
 import requests
 from bs4 import BeautifulSoup
 
+  
 # --- Alle Flask-Imports wurden entfernt ---
 # from flask import Flask, jsonify, request
 # from werkzeug.exceptions import abort
@@ -13,21 +14,21 @@ BASE_URL = "https://dualis.dhbw.de"
 
 
 @anvil.server.callable
-def get_semesters():
+def get_semesters2():
   # TODO: refactor code so that semesters can be accessed through endpoint
   # Gibt ein einfaches Dictionary zurück
   return {}
 
 
 @anvil.server.callable
-def get_units():
+def get_units2():
   # TODO: refactor code so that units and all relating exams can be accessed through endpoint
   # Gibt ein einfaches Dictionary zurück
   return {}
 
 
 @anvil.server.callable
-def get_grades(user, password):
+def get_grades2(user, password):
   """
   Anvil-Serverfunktion zur Abfrage von Noten von dualis.dhbw.de.
   Erwartet user und password als direkte Funktionsargumente.
@@ -59,7 +60,7 @@ def get_grades(user, password):
           "menu_type": "classic",
           "browser": "",
           "platform": ""
-         }
+        }
 
   login_response = requests.post(url, data=data, headers=None, verify=True, cookies=cookie_request.cookies)
 
@@ -166,5 +167,7 @@ if __name__ == "__main__":
 
   print("Verbunden mit Anvil. Warte auf Funktionsaufrufe...")
   anvil.server.wait_forever()
+
+
 
 
