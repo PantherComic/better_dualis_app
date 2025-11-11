@@ -42,9 +42,9 @@ class ItemTemplate1(ItemTemplate1Template):
     # damit die Höhe konsistent bleibt.
     status_text = self._item.get('status', '-') # Holt den Status
 
-    # Wenn der Text leer ist (oder nur Leerzeichen), setze einen Bindestrich
+    # Wenn der Text leer ist (oder nur Leerzeichen), setze "noch nicht bestanden"
     if not status_text or status_text.isspace():
-      self.status_label.text = "-"
+      self.status_label.text = "noch nicht bestanden" # <-- GEÄNDERT
     else:
       self.status_label.text = status_text
-      # --- ENDE KORREKTUR ---
+      # --- ENDE KORREKTUR -

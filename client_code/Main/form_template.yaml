@@ -10,7 +10,7 @@ components:
     properties:
       role: outlined-button
       spacing:
-        padding: [null, '15', '10', '15']
+        padding: [null, '10', '10', '10']
       text: Abmelden
     type: Button
   - event_bindings: {click: dualis_link_1_click}
@@ -20,7 +20,7 @@ components:
       background: theme:Primary
       foreground: theme:On Primary
       spacing:
-        padding: [null, '15', null, '15']
+        padding: [null, '10', null, '10']
       text: Dualis
     type: Button
   layout_properties: {slot: nav-right}
