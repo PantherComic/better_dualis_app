@@ -7,19 +7,7 @@ import re # Zum Parsen des REFRESH-Headers
 BASE_URL = "https://dualis.dhbw.de"
 
 @anvil.server.callable
-def get_semesters():
-  return {}
-
-@anvil.server.callable
-def get_units():
-  return {}
-
-@anvil.server.callable
 def get_grades(user, password):
-  """
-    Korrektur 11: Bereinigt den Studentennamen von überflüssigem Text
-    (z.B. "Name: " oder Anführungszeichen).
-    """
 
   print("--- Neue 'get_grades' Anfrage gestartet ---")
 
@@ -27,7 +15,6 @@ def get_grades(user, password):
   student_name = "Unbekannt" # Standardwert
 
   if not user or not password:
-    # ... (Fehlerbehandlung bleibt gleich) ...
     print("Fehler: Benutzer oder Passwort nicht angegeben.")
     raise anvil.server.PermissionDenied("Benutzername und Passwort dürfen nicht leer sein.")
 

@@ -17,7 +17,11 @@ components:
   type: Label
 - layout_properties: {grid_position: 'XUIIVC,IQBJZL'}
   name: status_label
-  properties: {}
+  properties: {underline: true}
   type: Label
+- layout_properties: {grid_position: 'XUIIVC,CMOZFB'}
+  name: spacer_1
+  properties: {height: 32}
+  type: Spacer
 container: {type: ColumnPanel}
 is_package: true

@@ -68,7 +68,12 @@ components:
   - event_bindings: {click: dualis_link_1_click}
     layout_properties: {}
     name: dualis_link_1
-    properties: {background: 'theme:Primary', foreground: 'theme:On Primary', text: Dualis}
+    properties:
+      background: theme:Primary
+      foreground: theme:On Primary
+      spacing:
+        padding: [null, '15', null, '15']
+      text: Dualis
     type: Button
   layout_properties: {slot: nav-right}
   name: navbar_links

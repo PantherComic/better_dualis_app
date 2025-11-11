@@ -6,40 +6,122 @@ from .ItemTemplate1 import ItemTemplate1
 
 class Main(MainTemplate):
   def __init__(self, result_data=None, **properties):
+    # Set Form properties and Data Bindings.
     self.init_components(**properties)
-    self.grades_panel.item_template = ItemTemplate1 
-    display_list = []
+
+    # --- KORREKTUR ENTFERNT ---
+    # Die Zeile 'self.grades_panel.spacing_below' wurde entfernt.
+    # 'ItemTemplate1.py' steuert jetzt den Abstand.
+
+    self.semester_dropdown.set_event_handler('change', self.semester_dropdown_change)
+
+    self.all_grades_list = []
 
     if result_data:
-      grades_list = result_data.get('grades', [])
-      student_name = result_data.get('student_name', 'Unbekannt')
+      student_name = result_data.get('student_name', 'Student')
+      self.name_display_label.text = f"Willkommen, {student_name}"
 
-      try:
-        self.name_display_label.text = f"Willkommen, {student_name}"
-      except AttributeError:
-        print("WARNUNG: Label 'name_display_label' nicht im Main-Formular gefunden.")
+      self.all_grades_list = result_data.get('grades', [])
 
-      for item in grades_list:
-        first_exam = item.get('exams', [{}])[0] 
-        display_list.append({
-          'semester_name': item.get('semester_name', 'N/A'),
-          'name': item.get('name', 'N/A'),
-          'grade': first_exam.get('grade', 'N/A'),
-          'status': first_exam.get('status', 'N/A'),
-          'cp': first_exam.get('cp', 'N/A') 
-        })
+      self.populate_semester_dropdown()
+      self.update_grades_display()
 
-      self.grades_panel.items = display_list
     else:
+      self.name_display_label.text = "Keine Daten empfangen."
       self.grades_panel.items = []
-      try:
-        self.name_display_label.text = "Willkommen"
-      except AttributeError:
-        pass
-      alert("Keine Noten zum Anzeigen gefunden.")
+      self.gpa_label.text = "N/A" 
+      self.total_cp_label.text = "0"
+
+    self.grades_panel.item_template = ItemTemplate1
 
   def abmelden_button_click(self, **event_args):
+    # ... (bleibt gleich) ...
     open_form('Login')
 
-  def dualis_link_1_click(self, **event_args):
+  def link_1_click(self, **event_args):
+    # ... (bleibt gleich) ...
     webbrowser.open("https://dualis.dhbw.de/")
+
+  def populate_semester_dropdown(self, **event_args):
+    # ... (bleibt gleich) ...
+    semester_names = set(item['semester_name'] for item in self.all_grades_list if item.get('semester_name'))
+    dropdown_items = [("Alle Semester", "ALL")]
+    for name in sorted(semester_names, reverse=True):
+      dropdown_items.append((name, name))
+    self.semester_dropdown.items = dropdown_items
+    self.semester_dropdown.selected_value = "ALL"
+
+  def semester_dropdown_change(self, **event_args):
+    # ... (bleibt gleich) ...
+    self.update_grades_display()
+
+  def calculate_gpa(self, grades_to_calc):
+    # ... (bleibt gleich) ...
+    total_weighted_grade = 0.0
+    total_cp = 0.0
+
+    for item in grades_to_calc:
+      grade_str = item.get('grade')
+      cp_str = item.get('cp')
+      status = item.get('status', '').lower()
+
+      if 'bestanden' in status or status == 'prüfung bestanden':
+        try:
+          grade = float(grade_str.replace(',', '.'))
+          cp = float(cp_str.replace(',', '.'))
+
+          if cp > 0 and grade > 0:
+            total_weighted_grade += (grade * cp)
+            total_cp += cp
+
+        except (ValueError, TypeError, AttributeError):
+          continue
+
+    if total_cp > 0:
+      gpa = total_weighted_grade / total_cp
+      return (gpa, total_cp) # Gibt Zahlen zurück
+    else:
+      return (None, 0) # Gibt None (für N/A) und 0 CPs zurück
+
+  def update_grades_display(self, **event_args):
+    # ... (Filter-Logik bleibt gleich) ...
+    selected_semester = self.semester_dropdown.selected_value
+
+    display_list = []
+
+    if selected_semester == "ALL":
+      filtered_list = self.all_grades_list
+    else:
+      filtered_list = [
+        item for item in self.all_grades_list 
+        if item.get('semester_name') == selected_semester
+      ]
+
+    for item in filtered_list:
+      exam = item.get('exams', [{}])[0]
+      display_list.append({
+        'semester_name': item.get('semester_name', '-'),
+        'name': item.get('name', 'N/A'),
+        'grade': exam.get('grade', '-'),
+        'status': exam.get('status', 'N/A'),
+        'cp': exam.get('cp', '-')
+      })
+
+    self.grades_panel.items = display_list
+
+    # ... (GPA-Berechnungslogik bleibt gleich) ...
+    gpa_value, cp_value = self.calculate_gpa(display_list)
+
+    try:
+      if gpa_value is not None:
+        self.gpa_label.text = f"{gpa_value:.2f}"
+      else:
+        self.gpa_label.text = "N/A"
+
+      self.total_cp_label.text = f"{cp_value:.0f}"
+
+      self.gpa_label.visible = True
+      self.total_cp_label.visible = True
+
+    except AttributeError as e:
+      print(f"WARNUNG: Label nicht im Main-Formular gefunden (z.B. 'gpa_label' oder 'total_cp_label'). Fehler: {e}")
