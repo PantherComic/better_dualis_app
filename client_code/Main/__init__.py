@@ -9,9 +9,6 @@ class Main(MainTemplate):
     # Set Form properties and Data Bindings.
     self.init_components(**properties)
 
-    # --- KORREKTUR ENTFERNT ---
-    # Die Zeile 'self.grades_panel.spacing_below' wurde entfernt.
-    # 'ItemTemplate1.py' steuert jetzt den Abstand.
 
     self.semester_dropdown.set_event_handler('change', self.semester_dropdown_change)
 
@@ -52,11 +49,9 @@ class Main(MainTemplate):
     self.semester_dropdown.selected_value = "ALL"
 
   def semester_dropdown_change(self, **event_args):
-    # ... (bleibt gleich) ...
     self.update_grades_display()
 
   def calculate_gpa(self, grades_to_calc):
-    # ... (bleibt gleich) ...
     total_weighted_grade = 0.0
     total_cp = 0.0
 
@@ -84,7 +79,6 @@ class Main(MainTemplate):
       return (None, 0) # Gibt None (für N/A) und 0 CPs zurück
 
   def update_grades_display(self, **event_args):
-    # ... (Filter-Logik bleibt gleich) ...
     selected_semester = self.semester_dropdown.selected_value
 
     display_list = []
@@ -109,7 +103,7 @@ class Main(MainTemplate):
 
     self.grades_panel.items = display_list
 
-    # ... (GPA-Berechnungslogik bleibt gleich) ...
+    # GPA-Berechnungslogik
     gpa_value, cp_value = self.calculate_gpa(display_list)
 
     try:
