@@ -32,15 +32,12 @@ class Main(MainTemplate):
     self.grades_panel.item_template = ItemTemplate1
 
   def abmelden_button_click(self, **event_args):
-    # ... (bleibt gleich) ...
     open_form('Login')
 
-  def link_1_click(self, **event_args):
-    # ... (bleibt gleich) ...
+  def dualis_link_1_click(self, **event_args):
     webbrowser.open("https://dualis.dhbw.de/")
 
   def populate_semester_dropdown(self, **event_args):
-    # ... (bleibt gleich) ...
     semester_names = set(item['semester_name'] for item in self.all_grades_list if item.get('semester_name'))
     dropdown_items = [("Alle Semester", "ALL")]
     for name in sorted(semester_names, reverse=True):
@@ -74,7 +71,7 @@ class Main(MainTemplate):
 
     if total_cp > 0:
       gpa = total_weighted_grade / total_cp
-      return (gpa, total_cp) # Gibt Zahlen zurück
+      return (gpa, total_cp)
     else:
       return (None, 0) # Gibt None (für N/A) und 0 CPs zurück
 

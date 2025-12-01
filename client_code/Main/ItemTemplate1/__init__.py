@@ -4,7 +4,6 @@ import anvil.server
 
 class ItemTemplate1(ItemTemplate1Template):
   def __init__(self, **properties):
-    # Set Form properties and Data Bindings.
     self.init_components(**properties)
 
     self.spacing_below = "medium"
@@ -23,7 +22,7 @@ class ItemTemplate1(ItemTemplate1Template):
     self.grade_label.text = self._item.get('grade', '-')
     self.cp_label.text = self._item.get('cp', '-')
 
-    status_text = self._item.get('status', '-') # Holt den Status
+    status_text = self._item.get('status', '-')
 
     # Wenn der Text leer ist (oder nur Leerzeichen), setze "noch nicht bestanden"
     if not status_text or status_text.isspace():

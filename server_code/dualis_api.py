@@ -2,7 +2,7 @@ import anvil.server
 import requests
 from bs4 import BeautifulSoup
 import time
-import re # Zum Parsen des REFRESH-Headers
+import re
 
 BASE_URL = "https://dualis.dhbw.de"
 
@@ -12,7 +12,7 @@ def get_grades(user, password):
   print("--- Neue 'get_grades' Anfrage gestartet ---")
 
   all_grades = []
-  student_name = "Unbekannt" # Standardwert
+  student_name = "Unbekannt"
 
   if not user or not password:
     print("Fehler: Benutzer oder Passwort nicht angegeben.")
@@ -88,7 +88,7 @@ def get_grades(user, password):
       name_span = soup.find('span', {'class': 'loginDataName'})
       if name_span:
         student_name = name_span.text.strip()
-        # BEREINIGUNG: Entfernt "Name: " (falls es doch mitgelesen wird)
+        # BEREINIGUNG: Entfernt "Name: "
         student_name = student_name.replace('Name:', '').replace('"', '').strip()
         print(f"Studentenname gefunden und bereinigt: {student_name}")
       else:
@@ -121,7 +121,7 @@ def get_grades(user, password):
 
     print(f"{len(semester_data_list)} Semester im Dropdown gefunden.")
 
-    # 9. Einzelne Semesterseiten abrufen (bleibt gleich)
+    # 9. Einzelne Semesterseiten abrufen
     for i, (sem_id, sem_name) in enumerate(semester_data_list):
       try:
         print(f"Aktualisiere 'Referer'-Header auf: {url_content}")
@@ -142,7 +142,7 @@ def get_grades(user, password):
 
     print(f"{len(all_grades)} Lerneinheiten insgesamt gefunden.")
 
-    # 10. Logout (bleibt gleich)
+    # 10. Logout
     s.headers.update({'Referer': url_content})
     logout_button = soup.find('a', {'id': 'logoutButton'})
     if logout_button and 'href' in logout_button.attrs:
@@ -218,7 +218,7 @@ def parse_semester_overview(html_content, semester_name):
   return grades_list
 
 
-# --- HINZUGEFÜGT: Anvil Server Uplink ---
+# --- Anvil Server Uplink ---
 if __name__ == "__main__":
   anvil.server.connect("DEIN_UPLINK_SCHLÜSSEL_HIER") 
   print("Verbunden mit Anvil. Warte auf Funktionsaufrufe...")
