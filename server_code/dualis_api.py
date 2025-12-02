@@ -180,7 +180,7 @@ def parse_semester_overview(html_content, semester_name):
   try:
     rows = table.find('tbody').find_all('tr')
   except AttributeError:
-    rows = table.find_all('tr') # Fallback
+    rows = table.find_all('tr')
 
   if not rows:
     print("DEBUG (parse_semester_overview): Tabelle 'nb list' gefunden, aber keine Zeilen (tr) darin.")
