@@ -100,7 +100,7 @@ class Main(MainTemplate):
 
     self.grades_panel.items = display_list
 
-    # GPA-Berechnungslogik
+    # GPA Anzegen
     gpa_value, cp_value = self.calculate_gpa(display_list)
 
     try:
