@@ -5,7 +5,7 @@ github:app_README).
 
 Webscraping mechanism for Dualis are based on [Dualis](https://github.com/KarelZe/dualis) by KarelZe
 
-#Functionality
+# Functionality
 
 You are able to sign in with your own dualis user-data und view your Modules, Grades, CP and more. 
 You are able to see them all in one table, or based of your smester-selection
