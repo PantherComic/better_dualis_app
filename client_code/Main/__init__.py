@@ -2,6 +2,7 @@ from ._anvil_designer import MainTemplate
 from anvil import *
 import anvil.server
 import webbrowser
+import re
 from .ItemTemplate1 import ItemTemplate1
 
 class Main(MainTemplate):
@@ -37,13 +38,42 @@ class Main(MainTemplate):
   def dualis_link_1_click(self, **event_args):
     webbrowser.open("https://dualis.dhbw.de/")
 
+  def sort_semester_key(self, semester_tuple):
+    name = semester_tuple[0] 
+
+    if name == "Alle Semester":
+      return (9999, 9999) 
+
+    match = re.search(r'\d{4}', name)
+    year = int(match.group()) if match else 0
+
+    if "WiSe" in name or "Winter" in name:
+      season = 2
+    elif "SoSe" in name or "Sommer" in name:
+      season = 1
+    else:
+      season = 0 
+
+    return (year, season)
+
   def populate_semester_dropdown(self, **event_args):
     semester_names = set(item['semester_name'] for item in self.all_grades_list if item.get('semester_name'))
     dropdown_items = [("Alle Semester", "ALL")]
-    for name in sorted(semester_names, reverse=True):
+
+    for name in semester_names:
       dropdown_items.append((name, name))
+
+    # Liste wird chronologisch sortiert ("Alle Semester" auf Index 0, neuestes Semester auf Index 1)
+    dropdown_items.sort(key=self.sort_semester_key, reverse=True)
+
     self.semester_dropdown.items = dropdown_items
-    self.semester_dropdown.selected_value = "ALL"
+
+    # NEU: Das neueste Semester als Standard auswählen (falls vorhanden)
+    if len(dropdown_items) > 1:
+      # dropdown_items[1] ist das neueste Semester. [1] greift auf den internen Wert zu.
+      self.semester_dropdown.selected_value = dropdown_items[1][1]
+    else:
+      self.semester_dropdown.selected_value = "ALL"
 
   def semester_dropdown_change(self, **event_args):
     self.update_grades_display()
